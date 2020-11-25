@@ -1,0 +1,57 @@
+{
+  "jobName": "<JOBNAME>",
+  "jobQueue": "ndmg-queue",
+  "dependsOn": [],
+  "jobDefinition": "ndmg",
+  "parameters": {},
+  "containerOverrides": {
+    "command": [
+      "--pipeline",
+      "<PIPE>",
+      "--acquisition",
+      "<ACQ>",
+      "--tr",
+      "<TR>",
+      "--mem_gb",
+      "<MEM>",
+      "--n_cpus",
+      "<CPUS>",
+      "--participant_label",
+      "<SUBJ>",
+      "--session_label",
+      "<SESH>",
+      "--push_location",
+      "<PUSH>",
+      "--parcellation",
+      "<PARCEL>",
+      "--voxelsize",
+      "<VOX>",
+      "--mod",
+      "<MOD>",
+      "--filtering_type",
+      "<FILTER>",
+      "--diffusion_model",
+      "<DIFF>",
+      "--space",
+      "<SPACE>",
+      "--seeds",
+      "<SEED>",
+      "<INPUT>",
+      "/output"
+    ],
+    "environment": [
+      {
+        "name": "AWS_ACCESS_KEY_ID",
+        "value": "<KEYID>"
+      },
+      {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "value": "<SECRET>"
+      },
+      {
+        "name": "AWS_DEFAULT_REGION",
+        "value": "us-east-1"
+      }
+    ]
+  }
+}

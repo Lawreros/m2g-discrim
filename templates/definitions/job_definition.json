@@ -1,0 +1,19 @@
+{
+    "jobDefinitionName": "ndmg", 
+    "type": "container", 
+    "parameters": {}, 
+    "containerProperties": {
+        "image": "neurodata/m2g", 
+        "vcpus": 2, 
+        "memory": 14000, 
+        "command": [
+            "--help"
+        ], 
+        "volumes": [], 
+        "environment": [], 
+        "mountPoints": [], 
+        "readonlyRootFilesystem": false, 
+        "privileged": true, 
+        "ulimits": []
+    }
+}

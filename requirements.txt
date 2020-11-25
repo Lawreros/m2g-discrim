@@ -1,0 +1,17 @@
+networkx
+nibabel
+nilearn
+sklearn
+numpy
+scipy>=0.13.3
+dipy
+boto3
+matplotlib
+plotly==1.12.1
+duecredit
+pybids
+configparser>=3.7.4
+fury==0.5.1
+pytest
+pathlib2
+graspy
