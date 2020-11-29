@@ -669,12 +669,11 @@ def avgconnectome(input_dir, output_dir, atlas):
 
     # itterate through list and calculate mean and variance of edgelist
     c = 0
-    tmat = np.zeros((N, N, len(graphs[dset])))
     files_ = [str(name) for name in connectomes]
-    nx_graphs = [
-        nx.read_weighted_edgelist(fi, nodetype=int, delimiter=" ")
-        for f in files_
-    ]
+    #nx_graphs = [
+    #    nx.read_weighted_edgelist(fi, nodetype=int, delimiter=" ")
+    #    for f in files_
+    #]
 
     #for loop to go through atlases and create average for each:
     #for dset in graphs.keys():

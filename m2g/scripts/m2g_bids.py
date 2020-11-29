@@ -179,7 +179,7 @@ def main():
         )
 
     # Get S3 input data if needed
-    if pipe = 'func':
+    if pipe =='func':
         if atlases is not None:
             for atlas in atlases:
                 info = f"mask_{atlas}"
@@ -187,7 +187,7 @@ def main():
         else:
             info = "mask_"
             cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
-    elif pipe='dwi':
+    elif pipe=='dwi':
         if atlases is not None:
             for atlas in atlases:
                 info = f"{atlas}"
