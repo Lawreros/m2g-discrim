@@ -22,6 +22,7 @@ import numpy as np
 from numpy import genfromtxt
 
 # m2g imports
+from m2g.scripts.discrim import discrim_runner, avgconnectome
 from m2g.utils import cloud_utils
 from m2g.utils import gen_utils
 from m2g.utils.gen_utils import DirectorySweeper
@@ -124,54 +125,14 @@ def main():
         files should be stored.""",
     )
     parser.add_argument(
-        "--participant_label",
-        help="""The label(s) of the
-        participant(s) that should be analyzed. The label
-        corresponds to sub-<participant_label> from the BIDS
-        spec (so it does not include "sub-"). If this
-        parameter is not provided all subjects should be
-        analyzed. Multiple participants can be specified
-        with a space separated list.""",
-        nargs="+",
+        "pipeline",
+        help="""Pipeline that created the data""",
     )
     parser.add_argument(
-        "--session_label",
-        help="""The label(s) of the
-        session that should be analyzed. The label
-        corresponds to ses-<participant_label> from the BIDS
-        spec (so it does not include "ses-"). If this
-        parameter is not provided all sessions should be
-        analyzed. Multiple sessions can be specified
-        with a space separated list.""",
-        nargs="+",
-    )
-    parser.add_argument(
-        "--pipeline",
+        "--ptr",
         action="store",
-        help="""Pipline to use when analyzing the input data, 
-        either func or dwi. If  Default is dwi.""",
-        default="dwi",
-    )
-    parser.add_argument(
-        "--acquisition",
-        action="store",
-        help="""Acquisition method for functional data:
-        altplus - Alternating in the +z direction
-        alt+z - Alternating in the +z direction
-        alt+z2 - Alternating, but beginning at slice #1
-        altminus - Alternating in the -z direction
-        alt-z - Alternating in the -z direction
-        alt-z2 - Alternating, starting at slice #nz-2 instead of #nz-1
-        seqplus - Sequential in the plus direction
-        seqminus - Sequential in the minus direction,
-        default is alt+z. For more information:https://fcp-indi.github.io/docs/user/func.html""",
-        default="alt+z",
-    )
-    parser.add_argument(
-        "--tr",
-        action="store",
-        help="functional scan TR (seconds), default is 2.0",
-        default=2.0
+        help="whether to pass to ranks",
+        default=True
     )
     parser.add_argument(
         "--push_location",
@@ -181,97 +142,89 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--parcellation",
-        action="store",
-        help="The parcellation(s) being analyzed. Multiple parcellations can be provided with a space separated list.",
+        "--atlases",
+        aciton="store",
+        help="which atlases to use",
         nargs="+",
         default=None,
     )
-    parser.add_argument(
-        "--skipeddy",
-        action="store_true",
-        help="Whether to skip eddy correction if it has already been run.",
-        default=False,
-    )
-    parser.add_argument(
-        "--skipreg",
-        action="store_true",
-        default=False,
-        help="whether or not to skip registration",
-    )
-    parser.add_argument(
-        "--voxelsize",
-        action="store",
-        default="2mm",
-        help="Voxel size : 2mm, 1mm. Voxel size to use for template registrations.",
-    )
-    parser.add_argument(
-        "--mod",
-        action="store",
-        help="Deterministic (det) or probabilistic (prob) tracking. Default is det.",
-        default="det",
-    )
-    parser.add_argument(
-        "--filtering_type",
-        action="store",
-        help="Tracking approach: local, particle. Default is local.",
-        default="local",
-    )
-    parser.add_argument(
-        "--diffusion_model",
-        action="store",
-        help="Diffusion model: csd or csa. Default is csa.",
-        default="csa",
-    )
-    parser.add_argument(
-        "--space",
-        action="store",
-        help="Space for tractography: native, native_dsn. Default is native.",
-        default="native",
-    )
-    parser.add_argument(
-        "--seeds",
-        action="store",
-        help="Seeding density for tractography. Default is 20.",
-        default=20,
-    )
-    parser.add_argument(
-        "--skull",
-        action="store",
-        help="""Special actions to take when skullstripping t1w image based on default skullstrip ('none') failure:
-        Excess tissue below brain: below
-        Chunks of cerebelum missing: cerebelum
-        Frontal clipping near eyes: eye
-        Excess clipping in general: general,""",
-        default=None,
-    )
-    parser.add_argument(
-        "--mem_gb",
-        action="store",
-        help="Memory, in GB, to allocate to functional pipeline",
-        default=20,
-    )
-    parser.add_argument(
-        "--n_cpus",
-        action="store",
-        help="Number of cpus to allocate to either the functional pipeline or the diffusion connectome generation",
-        default=1,
-    )
-    parser.add_argument(
-        "--itter",
-        action="store",
-        help="Number of itterations for memory check",
-        default=300,
-    )
-    parser.add_argument(
-        "--period",
-        action="store",
-        help="Number of seconds between memory check",
-        default=15,
-    )
     result = parser.parse_args()
-    itterations = result.itter
-    period = result.period
+    input_dir = result.input_dir
+    output_dir = result.output_dir
+    pipe = result.pipeline
+    ptr = result.ptr
+    push_location = result.push_location
+    atlases = result.atlases
+
+    ##---------------------------------------------------Start Discrim Calc--------------------------------------------------------------##
+
+    # Inputs needed:
+
+    # input_dir = location on bucket to download from
+    # push_location = where to push the discrim values and resulting connectomes
+    # ptr = whether to do PTR for functional
+    # atlases = which atlases to analyze (if none spceified, just get them all)
+    
+
+    # grab files from s3
+    creds = bool(cloud_utils.get_credentials())
+
+    buck, remo = cloud_utils.parse_path(input_dir)
+    home = os.path.expanduser("~")
+    input_dir = as_directory(home + "/.m2g/input", remove=True)
+    if (not creds) and push_location:
+        raise AttributeError(
+            """No AWS credentials found, but "--push_location" flag called. 
+            Pushing will most likely fail."""
+        )
+
+    # Get S3 input data if needed
+    if pipe = 'func':
+        if atlases is not None:
+            for atlas in atlases:
+                info = f"mask_{atlas}"
+                cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+        else:
+            info = "mask_"
+            cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+    elif pipe='dwi':
+        if atlases is not None:
+            for atlas in atlases:
+                info = f"{atlas}"
+                cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+        else:
+            info = ""
+            cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+
+    #now /root/.m2g/input/mask_.... has all these edgelists:
+
+    latlas = os.listdir(home + '/.m2g/input')
+
+    # Calculate discrim and average and push it
+    
+    for at in latlas:
+        discrim = discrim_runner(input_dir, at, ptr)
+
+        # Save discrim value
+
+
+        # Create averaged connectome
+
+        avgconnectome(input_dir, output_dir, at)
+
+
+        if push_location:
+            print(f"Pushing to s3 at {push_location}.")
+            push_buck, push_remo = cloud_utils.parse_path(push_location)
+            cloud_utils.s3_push_data(
+                push_buck,
+                push_remo,
+                output_dir,
+                subject=subject,
+                session=session,
+                creds=creds,
+            )
+
 
     # and ... begin!
     print("\nBeginning m2g ...")

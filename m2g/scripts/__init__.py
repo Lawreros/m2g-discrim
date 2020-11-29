@@ -12,3 +12,4 @@ m2g_cloud : for performing batch processing on AWS
 from . import m2g_bids
 from . import m2g_cloud
 from . import m2g_dwi_pipeline
+from . import discrim

@@ -134,7 +134,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
             break
 
 
-def s3_get_data(bucket, remote, local, info="", force=False):
+def s3_get_data(bucket, remote, local, info="", pipe="func", force=False):
     """Given and s3 directory, copies files/subdirectories in that directory to local
 
     Parameters
@@ -152,16 +152,6 @@ def s3_get_data(bucket, remote, local, info="", force=False):
         Whether to overwrite the local directory containing the s3 files if it already exists, by default False
     """
 
-    if info == "sub-":
-        print("Subject not specified, comparing input folder to remote directory...")
-    else:
-        if os.path.exists(os.path.join(local, info)) and not force:
-            if os.listdir(os.path.join(local, info)):
-                print(
-                    f"Local directory: {os.path.join(local,info)} already exists. Not pulling s3 data. Delete contents to re-download data."
-                )
-                return  # TODO: make sure this doesn't append None a bunch of times to a list in a loop on this function
-
     # get client with credentials if they exist
     client = s3_client(service="s3")
 
@@ -172,27 +162,45 @@ def s3_get_data(bucket, remote, local, info="", force=False):
             "Error: could not locate bucket. Available buckets: " + ", ".join(bkts)
         )
 
-    info = info.rstrip("/") + "/"
     bpath = get_matching_s3_objects(bucket, f"{remote}/{info}")
 
     # go through all folders inside of remote directory and download relevant files
     for obj in bpath:
-        bdir, data = os.path.split(obj)
-        localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
-        # Make directory for data if it doesn't exist
-        if not os.path.exists(localpath):
-            os.makedirs(localpath)
-        if not os.path.exists(f"{localpath}/{data}"):
-            print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
-            # Download file
-            client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
-            if os.path.exists(f"{localpath}/{data}"):
-                print("Success!")
+        if "NEW" in obj:
+            bdir, data = os.path.split(obj)
+            #get rid of redundent NEW directory
+            bdir= bdir.replace(f"/NEW","")
+            localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
+            # Make directory for data if it doesn't exist
+            if not os.path.exists(localpath):
+                os.makedirs(localpath)
+            if not os.path.exists(f"{localpath}/{data}"):
+                print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
+                # Download file
+                client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
+                if os.path.exists(f"{localpath}/{data}"):
+                    print("Success!")
+                else:
+                    print("Error: File not downloaded")
             else:
-                print("Error: File not downloaded")
-        else:
-            print(f"File {data} already exists at {localpath}/{data}")
-
+                print(f"File {data} already exists at {localpath}/{data}")
+        
+        elif pipe=='dwi':
+            bdir, data = os.path.split(obj)
+            localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
+            # Make directory for data if it doesn't exist
+            if not os.path.exists(localpath):
+                os.makedirs(localpath)
+            if not os.path.exists(f"{localpath}/{data}"):
+                print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
+                # Download file
+                client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
+                if os.path.exists(f"{localpath}/{data}"):
+                    print("Success!")
+                else:
+                    print("Error: File not downloaded")
+            else:
+                print(f"File {data} already exists at {localpath}/{data}")
 
 def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
     """Pushes dwi pipeline data to a specified S3 bucket
