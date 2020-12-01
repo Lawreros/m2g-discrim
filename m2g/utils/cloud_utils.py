@@ -166,43 +166,23 @@ def s3_get_data(bucket, remote, local, info="", pipe="func", force=False):
 
     # go through all folders inside of remote directory and download relevant files
     for obj in bpath:
-        if "NEW" in obj:
-            bdir, data = os.path.split(obj)
-            #get rid of redundent NEW directory
-            bdir= bdir.replace(f"/NEW","")
-            localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
-            # Make directory for data if it doesn't exist
-            if not os.path.exists(localpath):
-                os.makedirs(localpath)
-            if not os.path.exists(f"{localpath}/{data}"):
-                print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
-                # Download file
-                client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
-                if os.path.exists(f"{localpath}/{data}"):
-                    print("Success!")
-                else:
-                    print("Error: File not downloaded")
+        bdir, data = os.path.split(obj)
+        localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
+        # Make directory for data if it doesn't exist
+        if not os.path.exists(localpath):
+            os.makedirs(localpath)
+        if not os.path.exists(f"{localpath}/{data}"):
+            print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
+            # Download file
+            client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
+            if os.path.exists(f"{localpath}/{data}"):
+                print("Success!")
             else:
-                print(f"File {data} already exists at {localpath}/{data}")
-        
-        elif pipe=='dwi':
-            bdir, data = os.path.split(obj)
-            localpath = os.path.join(local, bdir.replace(f"{remote}/", ""))
-            # Make directory for data if it doesn't exist
-            if not os.path.exists(localpath):
-                os.makedirs(localpath)
-            if not os.path.exists(f"{localpath}/{data}"):
-                print(f"Downloading {bdir}/{data} from {bucket} s3 bucket...")
-                # Download file
-                client.download_file(bucket, f"{bdir}/{data}", f"{localpath}/{data}")
-                if os.path.exists(f"{localpath}/{data}"):
-                    print("Success!")
-                else:
-                    print("Error: File not downloaded")
-            else:
-                print(f"File {data} already exists at {localpath}/{data}")
+                print("Error: File not downloaded")
+        else:
+            print(f"File {data} already exists at {localpath}/{data}")
 
-def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
+def s3_push_data(bucket, remote, outDir, atlas=None, creds=True):
     """Pushes dwi pipeline data to a specified S3 bucket
 
     Parameters
@@ -233,18 +213,23 @@ def s3_push_data(bucket, remote, outDir, subject=None, session=None, creds=True)
         )
 
     # List all files and upload
-    for root, _, files in os.walk(outDir):
+    for root, _, files in os.walk(f"{outDir}/{atlas}"):
         for file_ in files:
-            if not "tmp/" in root:  # exclude things in the tmp/ folder
-                if f"sub-{subject}/ses-{session}" in root:
-                    print(f"Uploading: {os.path.join(root, file_)}")
-                    spath = root[root.find("sub-") :]  # remove everything before /sub-*
-                    client.upload_file(
-                        os.path.join(root, file_),
-                        bucket,
-                        f"{remote}/{os.path.join(spath,file_)}",
-                        ExtraArgs={"ACL": "public-read"},
-                    )
+            print(f"Uploading: {os.path.join(root, file_)}")
+            spath = root[root.find(atlas) :]  # remove everything before /atlas*
+            client.upload_file(
+                os.path.join(root, file_),
+                bucket,
+                f"{remote}/{os.path.join(spath,file_)}",
+                ExtraArgs={"ACL": "public-read"},
+            )
+    
+    client.upload_file(
+            os.path.join(f"{outDir}/Discrim_values.txt"),
+            bucket,
+            f"{remote}/Discrim_values.txt",
+            ExtraArgs={"ACL": "public-read"},
+        )
 
 def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
     """Pushes functional pipeline data to a specified S3 bucket

@@ -669,28 +669,28 @@ def avgconnectome(input_dir, output_dir, atlas):
 
     # itterate through list and calculate mean and variance of edgelist
     c = 0
-    files_ = [str(name) for name in connectomes]
+    files_ = [f"{input_dir}/{atlas}/{str(name)}" for name in connectomes]
+    #print('stop, please')
     #nx_graphs = [
-    #    nx.read_weighted_edgelist(fi, nodetype=int, delimiter=" ")
+    #    nx.read_weighted_edgelist(f, nodetype=int, delimiter=" ")
     #    for f in files_
     #]
+    
 
-    #for loop to go through atlases and create average for each:
-    #for dset in graphs.keys():
-    #    c = 0
-    #    tmat = np.zeros((N, N, len(graphs[dset])))
-    #    for subj in graphs[dset].keys():
-    #        tmpg = np.array(nx.adj_matrix(graphs[dset][subj]).todense())
-    #        tmat[:, :, c] = tmpg
-    #        c += 1
-    #    means[dset] = np.mean(tmat, axis=2)
-    #    var[dset] = np.var(tmat, axis=2)
+    list_of_arrays = import_edgelist(files_, delimiter=" ")  
+    if not isinstance(list_of_arrays, list):
+        list_of_arrays = [list_of_arrays]
+    stack = np.atleast_3d(list_of_arrays)
 
-    # Save the data in output directory
+    N, _, _ = stack.shape
 
-    #weighted_means = np.array([len(graphs[dset])*means[dset] for dset in dsets])
-    #weighted_sum = np.sum(weighted_means, axis=0)
-    #weighted_mean = weighted_sum/(1.0*S)
+    #Calculate mean and variance:
+    mean = np.mean(stack, axis=0)
+    var = np.var(stack, axis=0)
+
+    #Save connectomes
+    np.savetxt(f"{output_dir}/{atlas}/mean.csv", mean, delimiter=",")
+    np.savetxt(f"{output_dir}/{atlas}/variance.csv", var, delimiter=",")
 
 
     #weighted_squares = np.array([len(graphs[dset])*np.power(means[dset]-weighted_mean, 2) for dset in dsets])
