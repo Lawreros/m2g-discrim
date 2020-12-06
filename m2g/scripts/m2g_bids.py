@@ -205,10 +205,12 @@ def main():
 
     for at in latlas:
         os.makedirs(f"{output_dir}/{at}", exist_ok=True)
-        discrim = discrim_runner(input_dir, at, ptr)
+        discrim = discrim_runner(input_dir, at, ptr=False)
+        discrim_ptr = discrim_runner(input_dir, at, ptr=True)
         
         f = open(f"{output_dir}/Discrim_values.txt","a")
         f.write(f"{at} Discriminability is : {discrim}\n")
+        f.write(f"{at} PTR Discriminability is : {discrim_ptr}\n")
         f.close()
 
         # Create averaged/variance connectomes and save them

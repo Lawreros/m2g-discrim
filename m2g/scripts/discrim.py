@@ -677,20 +677,29 @@ def avgconnectome(input_dir, output_dir, atlas):
     #]
     
 
-    list_of_arrays = import_edgelist(files_, delimiter=" ")  
+    list_of_arrays, verts = import_edgelist(files_, delimiter=" ", return_vertices=True)
     if not isinstance(list_of_arrays, list):
         list_of_arrays = [list_of_arrays]
+
+    ptr_list_of_arrays = np.array([pass_to_ranks(array) for array in list_of_arrays])
+
     stack = np.atleast_3d(list_of_arrays)
+    ptr_stack = np.atleast_3d(ptr_list_of_arrays)
 
     N, _, _ = stack.shape
 
     #Calculate mean and variance:
     mean = np.mean(stack, axis=0)
     var = np.var(stack, axis=0)
+    ptr_mean = np.mean(ptr_stack, axis=0)
+    ptr_var = np.var(ptr_stack, axis=0)
 
     #Save connectomes
+    np.savetxt(f"{output_dir}/{atlas}/verts.csv", verts, delimiter=",")
     np.savetxt(f"{output_dir}/{atlas}/mean.csv", mean, delimiter=",")
     np.savetxt(f"{output_dir}/{atlas}/variance.csv", var, delimiter=",")
+    np.savetxt(f"{output_dir}/{atlas}/mean-ptr.csv", mean, delimiter=",")
+    np.savetxt(f"{output_dir}/{atlas}/variance-ptr.csv", var, delimiter=",")
 
 
     #weighted_squares = np.array([len(graphs[dset])*np.power(means[dset]-weighted_mean, 2) for dset in dsets])
