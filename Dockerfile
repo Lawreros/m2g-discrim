@@ -63,7 +63,7 @@ ENV PATH=/opt/afni:$PATH
 #--------M2G SETUP-----------------------------------------------------------#
 # setup of python dependencies for m2g itself, as well as file dependencies
 RUN \
-    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas==0.23.4 boto3 awscli virtualenv
+    pip3.6 install --no-cache-dir numpy nibabel scipy python-dateutil pandas==0.23.4 boto3 awscli
 RUN \
     pip3.6 install --no-cache-dir matplotlib nilearn sklearn cython vtk pyvtk fury
 RUN \
@@ -89,7 +89,7 @@ RUN git clone https://github.com/neurodata/graphutils.git /graphutils && \
     pip3.6 install .
 
 # Grab m2g from deploy.
-RUN git clone -b cpac-py3 https://github.com/neurodata/m2g /m2g && \
+RUN git clone -b main https://github.com/Lawreros/m2g-discrim /m2g && \
     cd /m2g && \
     pip3.6 install .
 RUN chmod -R 777 /usr/local/bin/m2g_bids
