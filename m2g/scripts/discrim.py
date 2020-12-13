@@ -637,22 +637,6 @@ def _discr_rdf(dissimilarities, labels):
 
 
 def discrim_runner(input_dir, atlas, ptr):
-    #atlases = ['_mask_MICCAI_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..MICCAI_space-MNI152NLin6_res-2x2x2.nii.gz/',
-    #'_mask_Yeo-17_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Yeo-17_space-MNI152NLin6_res-2x2x2.nii.gz/',
-    #'_mask_Yeo-7-liberal_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Yeo-7-liberal_space-MNI152NLin6_res-2x2x2.nii.gz/',
-    #'_mask_Yeo-7_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Yeo-7_space-MNI152NLin6_res-2x2x2.nii.gz/',
-    #]
-
-    #paths = ['/BNU3']
-
-    #discrim = {}
-    #for path in paths:
-    #    discrim[path]={}
-    #    for atlas in atlases:
-    #        m = NdmgStats(f'{path}/{atlas}/NEW') # grabs every edgelist file in a local ndmg
-    #        discrim[path][atlas[5:15]]=m.discriminability()
-    #        print(f"{atlas} analyzed: {discrim[path][atlas[5:15]]}")
-
     m = NdmgStats(f'{input_dir}/{atlas}')
     discrim=m.discriminability(PTR=ptr)
     print(f"{atlas} analyzed: {discrim}")
@@ -694,15 +678,65 @@ def avgconnectome(input_dir, output_dir, atlas):
     ptr_mean = np.mean(ptr_stack, axis=0)
     ptr_var = np.var(ptr_stack, axis=0)
 
-    #Save connectomes
-    np.savetxt(f"{output_dir}/{atlas}/verts.csv", verts, delimiter=",")
-    np.savetxt(f"{output_dir}/{atlas}/mean.csv", mean, delimiter=",")
-    np.savetxt(f"{output_dir}/{atlas}/variance.csv", var, delimiter=",")
-    np.savetxt(f"{output_dir}/{atlas}/mean-ptr.csv", mean, delimiter=",")
-    np.savetxt(f"{output_dir}/{atlas}/variance-ptr.csv", var, delimiter=",")
+    #Check that number of vertices and dimensions of averaged connectomes match up
+    if len(verts) != mean.shape[0]:
+        print(f'WARNING: Number of nodes and dimension of connectome do not match for: {atlas}!')
 
+    np.savetxt(f"{output_dir}/{atlas}/verts.csv", verts, fmt='%d', delimiter=" ")
 
-    #weighted_squares = np.array([len(graphs[dset])*np.power(means[dset]-weighted_mean, 2) for dset in dsets])
-    #weighted_sum_squares = np.sum(weighted_squares, axis=0)
-    #weighted_variance = weighted_sum_squares/(1.0*S)
-    #weighted_sd = np.sqrt(weighted_variance)
+    #Convert matrix to edgelists
+    a = sum(range(1, len(verts)))
+    arr = np.zeros((a,3))
+    z=0
+    for num in range(len(mean)):
+        for i in range(len(mean[num])):
+            if i > num:
+                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                arr[z][0]= f'{int(verts[num])}'#f'{num+1}'
+                arr[z][1]= f'{int(verts[i])}'
+                arr[z][2] = mean[num][i]
+                z=z+1
+    
+    np.savetxt(f"{output_dir}/{atlas}/mean.csv", arr, fmt='%d %d %f',delimiter=" ")
+
+    arr = np.zeros((a,3))
+    z=0
+    for num in range(len(var)):
+        for i in range(len(var[num])):
+            if i > num:
+                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                arr[z][0]= f'{int(verts[num])}'#f'{num+1}'
+                arr[z][1]= f'{int(verts[i])}'
+                arr[z][2] = var[num][i]
+                z=z+1
+
+    np.savetxt(f"{output_dir}/{atlas}/variance.csv", arr, fmt='%d %d %f',delimiter=" ")
+
+    arr = np.zeros((a,3))
+    z=0
+    for num in range(len(ptr_mean)):
+        for i in range(len(ptr_mean[num])):
+            if i > num:
+                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                arr[z][0]= f'{int(verts[num])}'#f'{num+1}'
+                arr[z][1]= f'{int(verts[i])}'
+                arr[z][2] = ptr_mean[num][i]
+                z=z+1
+
+    np.savetxt(f"{output_dir}/{atlas}/mean-ptr.csv", arr,fmt='%d %d %f', delimiter=" ")
+
+    arr = np.zeros((a,3))
+    z=0
+    for num in range(len(ptr_var)):
+        for i in range(len(ptr_var[num])):
+            if i > num:
+                #print(f'{num+1} {i+1} {my_data[num][i]}')
+                arr[z][0]= f'{int(verts[num])}'#f'{num+1}'
+                arr[z][1]= f'{int(verts[i])}'
+                arr[z][2] = ptr_var[num][i]
+                z=z+1
+    
+
+    np.savetxt(f"{output_dir}/{atlas}/variance-ptr.csv", arr,fmt='%d %d %f', delimiter=" ")
+
+    print(f'Averaged connectomes and variances saved for: {atlas}!')
