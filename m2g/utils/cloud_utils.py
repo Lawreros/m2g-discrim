@@ -182,7 +182,7 @@ def s3_get_data(bucket, remote, local, info="", pipe="func", force=False):
         else:
             print(f"File {data} already exists at {localpath}/{data}")
 
-def s3_push_data(bucket, remote, outDir, atlas=None, creds=True):
+def s3_push_data(bucket, remote, outDir, discrim=True, atlas=None, creds=True):
     """Pushes dwi pipeline data to a specified S3 bucket
 
     Parameters
@@ -224,12 +224,13 @@ def s3_push_data(bucket, remote, outDir, atlas=None, creds=True):
                 ExtraArgs={"ACL": "public-read"},
             )
     
-    client.upload_file(
-            os.path.join(f"{outDir}/Discrim_values.txt"),
-            bucket,
-            f"{remote}/Discrim_values.txt",
-            ExtraArgs={"ACL": "public-read"},
-        )
+    if discrim:
+        client.upload_file(
+                os.path.join(f"{outDir}/Discrim_values.txt"),
+                bucket,
+                f"{remote}/Discrim_values.txt",
+                ExtraArgs={"ACL": "public-read"},
+            )
 
 def s3_func_push_data(bucket, remote, outDir, subject=None, session=None, creds=True):
     """Pushes functional pipeline data to a specified S3 bucket

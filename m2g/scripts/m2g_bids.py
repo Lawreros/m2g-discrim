@@ -232,6 +232,7 @@ def main():
                 push_buck,
                 push_remo,
                 output_dir,
+                discrim=disc,
                 atlas=at,
                 creds=creds,
             )
