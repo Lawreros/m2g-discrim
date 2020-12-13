@@ -3,17 +3,14 @@ import os, ssl
 import boto3
 import csv
 import networkx as nx
-from nxviz import CircosPlot
 from matplotlib import pyplot as plt
-from m2g.utils.cloud_utils import get_matching_s3_objects
-from m2g.utils.cloud_utils import s3_client
 from graspy.utils import pass_to_ranks
 
 from math import floor
 import igraph as ig
-import plotly
+#import plotly
 import plotly.offline as py
-from plotly.graph_objs import *
+#from plotly.graph_objs import *
 
 # Find list of files
 # Average ndarray rows
@@ -21,15 +18,13 @@ from plotly.graph_objs import *
 Connections = {}
 ind_Connections={}
 
-bucket = 'ndmg-data'
 paths = ['ABIDEII-BNI_1/ABIDEII-BNI_1-m2g-dwi-04-15-20-csa-det-native/',
         'XHCUMS/XHCUMS-m2g-dwi-05-03-20-csa-det-native']
 
-localpath = '/input'
-datasets = ['BNU1','BNU3']
+localpath = '/discrim-data'
+datasets = ['BNU1','SWU3']
 dsize = [100,144]
-atlas = 'Desikan'
-
+atlas = '_mask_Desikan_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Desikan_space-MNI152NLin6_res-2x2x2.nii.gz'
 
 
 ADJMATRIX = True
@@ -37,21 +32,23 @@ ADJMATRIX = True
 #Calculate total size of scans
 tot = sum(dsize)
 
-means = OrderedDict()
-var = OrderedDict()
-
-for idx, dset in dataset:
+for idx, dset in enumerate(datasets):
     # get list of all files belonging to atlas:
     connectomes = os.listdir(f"{localpath}/{dset}/{atlas}")
 
-    if idx==0:
-        mean_files.append([f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "mean-ptr" in name])
-        var_files.append([f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "var-ptr" in name])
+    if idx>0:
+        for name in connectomes:
+            if "mean-ptr" in name:
+                mean_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
+            if "variance-ptr" in name:
+                var_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
+        
     else: # itterate through list and calculate mean and variance of edgelist
         mean_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "mean-ptr" in name]
-        var_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "var-ptr" in name]
+        var_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "variance-ptr" in name]
     
 
+# Create the weighted averages for mean and variance
 list_of_arrays, verts = import_edgelist(files_, delimiter=" ", return_vertices=True)
 if not isinstance(list_of_arrays, list):
     list_of_arrays = [list_of_arrays]
