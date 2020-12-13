@@ -135,6 +135,12 @@ def main():
         default=True
     )
     parser.add_argument(
+        "--discrim",
+        action="store",
+        help="Whether or not to calculate discriminability",
+        default=True
+    )
+    parser.add_argument(
         "--push_location",
         action="store",
         help="Name of folder on s3 to push output data to, if the folder does not exist, it will be created."
@@ -153,6 +159,7 @@ def main():
     output_dir = result.output_dir
     pipe = result.pipeline
     ptr = result.ptr
+    disc = result.discrim
     push_location = result.push_location
     atlases = result.atlases
 
@@ -202,16 +209,18 @@ def main():
 
     # Calculate discrim and average and push it
     ptr = (ptr=='True')
+    disc = (disc=='True')
 
     for at in latlas:
         os.makedirs(f"{output_dir}/{at}", exist_ok=True)
-        discrim = discrim_runner(input_dir, at, ptr=False)
-        discrim_ptr = discrim_runner(input_dir, at, ptr=True)
+        if disc:
+            discrim = discrim_runner(input_dir, at, ptr=False)
+            discrim_ptr = discrim_runner(input_dir, at, ptr=True)
         
-        f = open(f"{output_dir}/Discrim_values.txt","a")
-        f.write(f"{at} Discriminability is : {discrim}\n")
-        f.write(f"{at} PTR Discriminability is : {discrim_ptr}\n")
-        f.close()
+            f = open(f"{output_dir}/Discrim_values.txt","a")
+            f.write(f"{at} Discriminability is : {discrim}\n")
+            f.write(f"{at} PTR Discriminability is : {discrim_ptr}\n")
+            f.close()
 
         # Create averaged/variance connectomes and save them
         avgconnectome(input_dir, output_dir, at)
