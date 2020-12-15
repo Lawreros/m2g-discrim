@@ -5,29 +5,22 @@ import csv
 import networkx as nx
 from matplotlib import pyplot as plt
 from graspy.utils import pass_to_ranks
+from graspy.utils import import_edgelist
 
 from math import floor
 import igraph as ig
-#import plotly
+from plotly import tools
 import plotly.offline as py
+from plotly import graph_objects as go
 #from plotly.graph_objs import *
 
 # Find list of files
 # Average ndarray rows
 
-Connections = {}
-ind_Connections={}
-
-paths = ['ABIDEII-BNI_1/ABIDEII-BNI_1-m2g-dwi-04-15-20-csa-det-native/',
-        'XHCUMS/XHCUMS-m2g-dwi-05-03-20-csa-det-native']
-
-localpath = '/discrim-data'
-datasets = ['BNU1','SWU3']
-dsize = [100,144]
-atlas = '_mask_Desikan_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Desikan_space-MNI152NLin6_res-2x2x2.nii.gz'
-
-
-ADJMATRIX = True
+localpath = '/discrim-data/diffusion'
+datasets = ['SWU4','HNU1','NKIENH','XHCUMS','BNU1','BNU3','IPCAS8','NKI1','NKI24','MRN1']
+dsize = [382,298,192,120,114,46,40,36,36,20]
+atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
 
 #Calculate total size of scans
 tot = sum(dsize)
@@ -49,147 +42,171 @@ for idx, dset in enumerate(datasets):
     
 
 # Create the weighted averages for mean and variance
-list_of_arrays, verts = import_edgelist(files_, delimiter=" ", return_vertices=True)
-if not isinstance(list_of_arrays, list):
-    list_of_arrays = [list_of_arrays]
+list_of_means, verts = import_edgelist(mean_files, delimiter=" ", return_vertices=True)
+if not isinstance(list_of_means, list):
+    list_of_means = [list_of_means]
 
-ptr_list_of_arrays = np.array([pass_to_ranks(array) for array in list_of_arrays])
+list_of_vars, verts = import_edgelist(var_files, delimiter=" ", return_vertices=True)
+if not isinstance(list_of_vars, list):
+    list_of_vars = [list_of_vars]
 
-stack = np.atleast_3d(list_of_arrays)
-ptr_stack = np.atleast_3d(ptr_list_of_arrays)
+mean_connectome = np.array([array * (dsize[idx]/tot) for idx, array in enumerate(list_of_means)])
+mean_connectome = np.atleast_3d(mean_connectome)
+mean_connectome = np.sum(mean_connectome, axis=0)
 
-N, _, _ = stack.shape
+var_connectome = np.array([array * ((dsize[idx]/tot)*(dsize[idx]/tot)) for idx, array in enumerate(list_of_vars)])
+var_connectome = np.atleast_3d(var_connectome)
+var_connectome = np.sum(var_connectome, axis=0)
 
-#Calculate mean and variance:
-mean = np.mean(stack, axis=0)
-var = np.var(stack, axis=0)
-ptr_mean = np.mean(ptr_stack, axis=0)
-ptr_var = np.var(ptr_stack, axis=0)
 
-#Check that number of vertices and dimensions of averaged connectomes match up
-if len(verts) != mean.shape[0]:
-    print(f'WARNING: Number of nodes and dimension of connectome do not match for: {atlas}!')
+# Plot connectomes in one figure:
+tits = tuple(["{}".format(idx) for idx in datasets])
+tits += ('Weighted Mean', 'Weighted Variance')
 
-np.savetxt(f"{output_dir}/{atlas}/verts.csv", verts, fmt='%d', delimiter=" ")
+specs=[[{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
+       [{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
+       [{'colspan': 4, 'rowspan':2}, None, None, None, {'colspan':4, 'rowspan':2}, None, None, None, None, None],
+       [None, None, None, None, None, None, None, None, None, None]]
 
-#Convert matrix to edgelists
-a = sum(range(1, len(verts)))
-arr = np.zeros((a,3))
-z=0
-for num in range(len(mean)):
-    for i in range(len(mean[num])):
-        if i > num:
-            #print(f'{num+1} {i+1} {my_data[num][i]}')
-            arr[z][0]= f'{int(verts[num])}'#f'{num+1}'
-            arr[z][1]= f'{int(verts[i])}'
-            arr[z][2] = mean[num][i]
-            z=z+1
+multi = tools.make_subplots(rows=4, cols=10, subplot_titles=tits, specs=specs,
+                            horizontal_spacing=0.04, vertical_spacing=0.08)
+locs = [(1,1), (1,3), (1,5), (1,7), (1,9),
+        (2,1), (2,3), (2,5), (2,7), (2,9),
+        (3,1), (3,5)]
+
+list_of_means.append(mean_connectome)
+list_of_means.append(var_connectome)
+
+anno = []
+for idx, ploty in enumerate(list_of_means):
+    #ploty[0]['zmin'] = zmin
+    #ploty[0]['zmax'] = zmax
+    c = idx+1
+    #for comp in ploty:
+    if idx == 11:
+        multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="viridis"), *locs[idx])
+    else:
+        multi.append_trace(go.Heatmap(z=ploty, coloraxis="coloraxis"), *locs[idx])
+    if idx == 5:
+        multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
+        multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['yaxis'+str(c)]['ticktext'] = ['1', '35', '70']
+        multi.layout['xaxis'+str(c)]['ticktext'] = ['1', '35', '70']
+        multi.layout['yaxis'+str(c)]['tickfont'] = dict(size=14, color='#28282e')
+        multi.layout['xaxis'+str(c)]['tickfont'] = dict(size=14, color='#28282e')
+    else:
+        multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
+        multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['yaxis'+str(c)]['ticktext'] = ['', '', '']
+        multi.layout['xaxis'+str(c)]['ticktext'] = ['', '', '']
+
+# multi.layout.width = 1200
+# multi.layout.height = 900
+multi['layout'].update(title="Study Mean Connectomes")
+
+# Set the color for the heatmaps
+multi.update_layout(coloraxis = {'colorscale':'viridis'})
+
+# iplot(multi)
+py.plot(multi, validate=False, filename='/disctest/mean_diff_connectomes.html')
+
+
+# -----------------------Functional Mean Connectome----------------------- #
+
+localpath = '/discrim-data/diffusion'
+datasets = ['SWU4','HNU1','NKIENH','XHCUMS','BNU1','BNU3','IPCAS8','NKI1','NKI24','MRN1']
+dsize = [382,298,192,120,114,46,40,36,36,20]
+atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
+
+#Calculate total size of scans
+tot = sum(dsize)
+
+for idx, dset in enumerate(datasets):
+    # get list of all files belonging to atlas:
+    connectomes = os.listdir(f"{localpath}/{dset}/{atlas}")
+
+    if idx>0:
+        for name in connectomes:
+            if "mean-ptr" in name:
+                mean_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
+            if "variance-ptr" in name:
+                var_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
+        
+    else: # itterate through list and calculate mean and variance of edgelist
+        mean_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "mean-ptr" in name]
+        var_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "variance-ptr" in name]
     
 
+# Create the weighted averages for mean and variance
+list_of_means, verts = import_edgelist(mean_files, delimiter=" ", return_vertices=True)
+if not isinstance(list_of_means, list):
+    list_of_means = [list_of_means]
+
+list_of_vars, verts = import_edgelist(var_files, delimiter=" ", return_vertices=True)
+if not isinstance(list_of_vars, list):
+    list_of_vars = [list_of_vars]
+
+mean_connectome = np.array([array * (dsize[idx]/tot) for idx, array in enumerate(list_of_means)])
+mean_connectome = np.atleast_3d(mean_connectome)
+mean_connectome = np.sum(mean_connectome, axis=0)
+
+var_connectome = np.array([array * ((dsize[idx]/tot)*(dsize[idx]/tot)) for idx, array in enumerate(list_of_vars)])
+var_connectome = np.atleast_3d(var_connectome)
+var_connectome = np.sum(var_connectome, axis=0)
 
 
+# Plot connectomes in one figure:
+tits = tuple(["{}".format(idx) for idx in datasets])
+tits += ('Weighted Mean', 'Weighted Variance')
 
-qq=0
-for p in paths:
-    all_files = get_matching_s3_objects(bucket,p,suffix="csv")
-    for fi in all_files:
-        client.download_file(bucket, fi, f"{localpath}/con_avg/{qq}.csv")
-        print(f"Downloaded {qq}.csv")
-        ind_Connections=np.zeros((71,71))
+specs=[[{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
+       [{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
+       [{'colspan': 4, 'rowspan':2}, None, None, None, {'colspan':4, 'rowspan':2}, None, None, None, None, None],
+       [None, None, None, None, None, None, None, None, None, None]]
 
-        #networkx.read_edgelist(f'{localpath}/con_avg/{qq}.csv', delimiter=',')
-        with open(f'{localpath}/con_avg/{qq}.csv', newline='') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                edges = str(row).split("'")[1]
-                a = int(edges.split(' ')[0])
-                b = int(edges.split(' ')[1])
-                weight = float(edges.split(' ')[2])
+multi = tools.make_subplots(rows=4, cols=10, subplot_titles=tits, specs=specs,
+                            horizontal_spacing=0.04, vertical_spacing=0.08)
+locs = [(1,1), (1,3), (1,5), (1,7), (1,9),
+        (2,1), (2,3), (2,5), (2,7), (2,9),
+        (3,1), (3,5)]
 
-                #if a not in ind_Connections.keys():
-                #    ind_Connections[a]={}
-                #    ind_Connections[a][b] = np.zeros(0)
-                #elif b not in ind_Connections[a].keys():
-                #    ind_Connections[a][b] = np.zeros(0)
+list_of_means.append(mean_connectome)
+list_of_means.append(var_connectome)
 
-                #ind_Connections[a][b] = np.append(ind_Connections[a][b],[weight])
+anno = []
+for idx, ploty in enumerate(list_of_means):
+    #ploty[0]['zmin'] = zmin
+    #ploty[0]['zmax'] = zmax
+    c = idx+1
+    #for comp in ploty:
+    if idx == 11:
+        multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="viridis"), *locs[idx])
+    else:
+        multi.append_trace(go.Heatmap(z=ploty, coloraxis="coloraxis"), *locs[idx])
+    if idx == 5:
+        multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
+        multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['yaxis'+str(c)]['ticktext'] = ['1', '35', '70']
+        multi.layout['xaxis'+str(c)]['ticktext'] = ['1', '35', '70']
+        multi.layout['yaxis'+str(c)]['tickfont'] = dict(size=14, color='#28282e')
+        multi.layout['xaxis'+str(c)]['tickfont'] = dict(size=14, color='#28282e')
+    else:
+        multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
+        multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
+        multi.layout['yaxis'+str(c)]['ticktext'] = ['', '', '']
+        multi.layout['xaxis'+str(c)]['ticktext'] = ['', '', '']
 
-                ind_Connections[a][b] = weight
+# multi.layout.width = 1200
+# multi.layout.height = 900
+multi['layout'].update(title="Study Mean Connectomes")
 
+# Set the color for the heatmaps
+multi.update_layout(coloraxis = {'colorscale':'viridis'})
 
-        r,c = ind_Connections.shape
-        for k in range(1,r):
-            for j in range(k+1,c):
-                if str(k) not in Connections.keys():
-                    Connections[str(k)]={}
-                    Connections[str(k)][str(j)] = np.zeros(0)
-                elif str(j) not in Connections[str(k)].keys():
-                    Connections[str(k)][str(j)] = np.zeros(0)
+# iplot(multi)
+py.plot(multi, validate=False, filename='/disctest/mean_diff_connectomes.html')
 
-                Connections[str(k)][str(j)] = np.append(Connections[str(k)][str(j)],[ind_Connections[k][j]])
-
-        os.remove(f'{localpath}/con_avg/{qq}.csv')
-        qq=qq+1
-
-
-
-#Calculate average connections and make it into a matrix
-
-heatmap = np.zeros((71,71))
-edgeweights = list()
-edge_colors = {}
-
-if ADJMATRIX:
-    for k in Connections:
-        for j in Connections[k]:
-            heatmap[int(k)][int(j)] = np.average(Connections[k][j])
-            heatmap[int(j)][int(k)] = np.average(Connections[k][j])
-else:
-    for k in Connections:
-        for j in Connections[k]:
-            if np.average(Connections[k][j]) > 0.8:
-                heatmap[int(k)][int(j)] = np.average(Connections[k][j])*4
-            elif np.average(Connections[k][j]) <= 0.8 and np.average(Connections[k][j]) > 0.5:
-                heatmap[int(k)][int(j)] = np.average(Connections[k][j])/2
-            else:
-                heatmap[int(k)][int(j)] = 0
-            edgeweights.append(np.average(Connections[k][j]))
-
-
-##### Heatmap Generation
-
-#https://stackoverflow.com/questions/43290853/how-to-create-heat-map-from-irregular-xyz-data-in-pyplot
-#https://matplotlib.org/3.3.3/api/_as_gen/matplotlib.pyplot.pcolormesh.html
-#https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/image_annotated_heatmap.html
-
-
-if ADJMATRIX:
-#Generate labels for figure
-    atlases=list()
-    for i in range(0,71):
-        atlases.append(str(i))
-
-    fig, ax = plt.subplots()
-    im = ax.imshow(heatmap, cmap="gist_heat_r") #Can specify the colorscheme you wish to use
-    ax.set_xticks(np.arange(len(atlases)))
-    ax.set_yticks(np.arange(len(atlases)))
-
-    ax.set_xticklabels(atlases)
-    ax.set_yticklabels(atlases)
-
-    #Label x and y-axis, adjust fontsize as necessary
-    plt.setp(ax.get_xticklabels(), fontsize=6, rotation=90, ha="right", va="center", rotation_mode="anchor")
-    plt.setp(ax.get_yticklabels(), fontsize=6)
-
-    plt.colorbar(im, aspect=30)
-    ax.set_title("Averaged Connections")
-        
-    fig.tight_layout()
-
-    plt.show()
-
-    plt.savefig(f'{localpath}/con_avg/heatmap.png', dpi=1000)
-
-##### END
-
-print('oof')
