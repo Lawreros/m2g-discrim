@@ -60,8 +60,8 @@ var_connectome = np.sum(var_connectome, axis=0)
 
 
 # Plot connectomes in one figure:
-tits = tuple(["{}".format(idx) for idx in datasets])
-tits += ('Weighted Mean', 'Weighted Variance')
+tits = tuple([f"{d} (N={dsize[idx]})" for idx, d in enumerate(datasets)])
+tits += (f'Weighted Mean (N={tot})', f'Weighted Variance (N={tot})')
 
 specs=[[{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
        [{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
@@ -87,7 +87,7 @@ for idx, ploty in enumerate(list_of_means):
         multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="viridis"), *locs[idx])
     else:
         multi.append_trace(go.Heatmap(z=ploty, coloraxis="coloraxis"), *locs[idx])
-    if idx == 5:
+    if idx==0 or idx == 5 or idx==10:
         multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
         multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
         multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
@@ -113,12 +113,19 @@ multi.update_layout(coloraxis = {'colorscale':'viridis'})
 py.plot(multi, validate=False, filename='/disctest/mean_diff_connectomes.html')
 
 
+
+
+
+
+
+
+
 # -----------------------Functional Mean Connectome----------------------- #
 
-localpath = '/discrim-data/diffusion'
-datasets = ['SWU4','HNU1','NKIENH','XHCUMS','BNU1','BNU3','IPCAS8','NKI1','NKI24','MRN1']
-dsize = [382,298,192,120,114,46,40,36,36,20]
-atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
+localpath = '/discrim-data/functional'
+datasets = ['SWU4','HNU1','NYU2','XHCUMS','UPSM1','BNU3','IPCAS7','SWU1','IPCAS1','BNU1']
+dsize = [429,300,300,247,230,144,144,119,114,106]
+atlas = '_mask_Desikan_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Desikan_space-MNI152NLin6_res-2x2x2.nii.gz'
 
 #Calculate total size of scans
 tot = sum(dsize)
@@ -158,8 +165,8 @@ var_connectome = np.sum(var_connectome, axis=0)
 
 
 # Plot connectomes in one figure:
-tits = tuple(["{}".format(idx) for idx in datasets])
-tits += ('Weighted Mean', 'Weighted Variance')
+tits = tuple([f"{d} (N={dsize[idx]})" for idx, d in enumerate(datasets)])
+tits += (f'Weighted Mean (N={tot})', f'Weighted Variance (N={tot})')
 
 specs=[[{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
        [{'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None, {'colspan': 2}, None],
@@ -185,7 +192,7 @@ for idx, ploty in enumerate(list_of_means):
         multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="viridis"), *locs[idx])
     else:
         multi.append_trace(go.Heatmap(z=ploty, coloraxis="coloraxis"), *locs[idx])
-    if idx == 5:
+    if idx==0 or idx == 5 or idx==10:
         multi.layout['yaxis'+str(c)]['autorange'] = 'reversed'
         multi.layout['yaxis'+str(c)]['tickvals'] = [0, 34, 69]
         multi.layout['xaxis'+str(c)]['tickvals'] = [0, 34, 69]
@@ -208,5 +215,5 @@ multi['layout'].update(title="Study Mean Connectomes")
 multi.update_layout(coloraxis = {'colorscale':'viridis'})
 
 # iplot(multi)
-py.plot(multi, validate=False, filename='/disctest/mean_diff_connectomes.html')
+py.plot(multi, validate=False, filename='/disctest/mean_func_connectomes.html')
 
