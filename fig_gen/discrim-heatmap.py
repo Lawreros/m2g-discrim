@@ -18,8 +18,10 @@ from plotly.graph_objs import *
 
 ##-----------DIFFUSION DISCRIM--------------------##
 func_datasets=['SWU4','HNU1','XHCUMS','BNU1','IPCAS8','NKI1','NKI24','MRN1']
-dsizes=[384,298,120,114,40,36,36,20]
-func_atlases=['Glasser','Schaefer1000','Schaefer300','Schaefer400','Schaefer200','AICHA','CAPRSC','Destrieux','DS00278','CPAC200','Brodmann','DKT','Talairach','Desikan','HOC','Slab907','AAL','Hammersmith','Slab1068','DS00195','DS00096','Yeo-17-lib','DS00071','MICCAI','Yeo17','DS00108','DS00140','HOS','JHU','DesikanKlein','Yeo-7-lib','Yeo-7','Juelich','Princeton','Tissue]
+func_datasets.reverse()
+dsizes=[384,298,120,114,50,46,46,30]#40,36,36,20]
+dsizes.reverse()
+func_atlases=['Glasser','Schaefer1000','Schaefer300','Schaefer400','Schaefer200','AICHA','CAPRSC','Destrieux','DS00278','CPAC200','Brodmann','DKT','Talairach','Desikan','HOC','Slab907','AAL','Hammersmith','Slab1068','DS00195','DS00096','Yeo-17-lib','DS00071','MICCAI','Yeo17','DS00108','DS00140','HOS','JHU','DesikanKlein','Yeo-7-lib','Yeo-7','Juelich','Princeton','Tissue']
 tot=sum(dsizes)
 
 SWU4=[0.907092114610466,0.905470044991712,0.897720814586787,0.900556476438551,0.897347856973715,0.891771252663983,0.897762254321572,0.8804641250296,0.881091641013497,0.852030547004499,0.875017759886337,0.884164101349751,0.888367274449444,0.873697608335307,0.873460809850817,0.87183282026995,0.861715605020128,0.877912621359223,0.855653563817191,0.840516220696188,0.874295524508643,0.846400663035757,0.863112716078617,0.87700686715605,0.850153919014918,0.848218091404215,0.817315889178309,0.855659483779304,0.770139711105849,0.826906227800142,0.751435590812219,0.74920672507696,0.659489699265925,0.499905280606204,0.553856855316126]
@@ -33,7 +35,7 @@ MRN1=[0.908333333333333,0.925,0.875,0.883333333333333,0.833333333333333,0.891666
 
 
 
-x = np.arange(35)
+x = np.arange(0,72,2)#36)
 i = 0
 q = [0]
 qq = []
@@ -49,33 +51,33 @@ yticks = np.array(qq)
 
 X,Y = np.meshgrid(x,y)
 
-Z=np.zeros((len(y),len(x)))
+Z=np.zeros((len(y),len(x)-1))
 
-Z[0] = np.array(SWU4)
-Z[1] = np.array(HNU1)
-Z[2] = np.array(XHCUMS)
-Z[3] = np.array(BNU1)
-Z[4] = np.array(IPCAS8)
-Z[5] = np.array(NKI1)
-Z[6] = np.array(NKI24)
-Z[7] = np.array(MRN1)
+Z[7] = np.array(SWU4)
+Z[6] = np.array(HNU1)
+Z[5] = np.array(XHCUMS)
+Z[4] = np.array(BNU1)
+Z[3] = np.array(IPCAS8)
+Z[2] = np.array(NKI1)
+Z[1] = np.array(NKI24)
+Z[0] = np.array(MRN1)
 
 fig, ax = plt.subplots()
-plt.pcolormesh(X,Y,Z,cmap='PiYG')
-ax.set_xticks(np.arange(0.5,len(func_atlases)+0.5,1))
+plt.pcolormesh(X,Y,Z,cmap='jet_r')
+ax.set_xticks(np.arange(1,len(func_atlases)*2+1,2))
 ax.set_yticks(np.array(yticks))
 
-ax.set_xticklabels(np.array(func_atlases))
-ax.set_yticklabels(np.array(func_datasets))
+ax.set_xticklabels(np.array(func_atlases),fontsize=6)
+ax.set_yticklabels(np.array(func_datasets), fontsize=10)
 
 ax.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
-plt.setp(ax.get_xticklabels(), rotation=-30, ha="right", rotation_mode="anchor")
+plt.setp(ax.get_xticklabels(), rotation=-40, ha="right", rotation_mode="anchor")
 
 
-ax.set_aspect(aspect=0.05)
+ax.set_aspect(aspect=0.04)
 
-#plt.colorbar()
-plt.savefig('/qwop.png')
+plt.colorbar()
+plt.savefig('/disc_heatmap.png')
 
 
 
@@ -86,7 +88,9 @@ plt.savefig('/qwop.png')
 ##-----------FUNCTIONAL DISCRIM-------------------##
 
 func_datasets=['SWU4','HNU1','NYU2','XHCUMS','UPSM1','BNU3','IPCAS7','SWU1','IPCAS1','BNU1']
+func_datasets.reverse()
 dsizes=[429,300,300,247,230,144,144,119,114,106]
+dsizes.reverse()
 func_atlases=['Schaefer1000','Slab907','Schaefer400','Slab1068','CAPRSC','Schaefer300','AICHA','Schaefer200','Glasser','CPAC200','DS00278','DS00195','Princetonvisual','DS00140','Talairach','DS00096','DS00108','DS00071','Destrieux','Juelich','Desikan','MICCAI','AAL','HOC','DKT','Brodmann','DesikanKlein','Hammersmith','Yeo-17','Yeo-17-lib','HOS','JHU','Yeo-7','Yeo-7-lib','Tissue']
 tot=sum(dsizes)
 
@@ -103,7 +107,7 @@ BNU1=[0.990433673469388,0.996811224489796,0.981611394557823,0.989583333333333,0.
 
 
 
-x = np.arange(35)
+x = np.arange(0,72,2)
 i = 0
 q = [0]
 qq = []
@@ -119,35 +123,35 @@ yticks = np.array(qq)
 
 X,Y = np.meshgrid(x,y)
 
-Z=np.zeros((len(y),len(x)))
+Z=np.zeros((len(y),len(x)-1))
 
-Z[0] = np.array(SWU4)
-Z[1] = np.array(HNU1)
-Z[2] = np.array(NYU2)
-Z[3] = np.array(XHCUMS)
-Z[4] = np.array(UPSM1)
-Z[5] = np.array(BNU3)
-Z[6] = np.array(IPCAS7)
-Z[7] = np.array(SWU1)
-Z[8] = np.array(IPCAS1)
-Z[9] = np.array(BNU1)
+Z[9] = np.array(SWU4)
+Z[8] = np.array(HNU1)
+Z[7] = np.array(NYU2)
+Z[6] = np.array(XHCUMS)
+Z[5] = np.array(UPSM1)
+Z[4] = np.array(BNU3)
+Z[3] = np.array(IPCAS7)
+Z[2] = np.array(SWU1)
+Z[1] = np.array(IPCAS1)
+Z[0] = np.array(BNU1)
 
 fig, ax = plt.subplots()
-plt.pcolormesh(X,Y,Z,cmap='PiYG')
-ax.set_xticks(np.arange(0.5,len(func_atlases)+0.5,1))
+plt.pcolormesh(X,Y,Z,cmap='jet_r')
+ax.set_xticks(np.arange(1,len(func_atlases)*2+1,2))
 ax.set_yticks(np.array(yticks))
 
-ax.set_xticklabels(np.array(func_atlases))
-ax.set_yticklabels(np.array(func_datasets))
+ax.set_xticklabels(np.array(func_atlases),fontsize=6)
+ax.set_yticklabels(np.array(func_datasets),fontsize=10)
 
 ax.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
-plt.setp(ax.get_xticklabels(), rotation=-30, ha="right", rotation_mode="anchor")
+plt.setp(ax.get_xticklabels(), rotation=-40, ha="right", rotation_mode="anchor")
 
 
-ax.set_aspect(aspect=0.05)
+ax.set_aspect(aspect=0.02)
 
-#plt.colorbar()
-plt.savefig('/qwop.png')
+plt.colorbar()
+plt.savefig('/func_heatmap.png')
 
 print('stop')
 

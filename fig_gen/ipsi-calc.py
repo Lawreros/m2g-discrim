@@ -7,7 +7,7 @@ from nxviz import CircosPlot
 from matplotlib import pyplot as plt
 from m2g.utils.cloud_utils import get_matching_s3_objects
 from m2g.utils.cloud_utils import s3_client
-from graspy.utils import pass_to_ranks
+from graspy.utils import pass_to_ranks, import_edgelist
 
 from math import floor
 import igraph as ig
@@ -15,37 +15,13 @@ import plotly
 import plotly.offline as py
 from plotly.graph_objs import *
 
-# Find list of files
-
-# Loop through and download files
-# Record values for each edge in an ndarray
-
-# Average ndarray rows
-
 Connections = {}
 ind_Connections={}
 
-bucket = 'ndmg-data'
-paths = ['ABIDEII-BNI_1/ABIDEII-BNI_1-m2g-dwi-04-15-20-csa-det-native/',
-        #'ABIDEII-SDSU_1/ABIDEII-SDSU_1-m2g-dwi-05-03-20-csa-det-native/',
-        #'ABIDEII-TCD_1/ABIDEII-TCD_1-m2g-dwi-04-15-20-csa-det-native',
-        #'BNU1/BNU1-2-8-20-m2g_staging-native-csa-det',
-        #'BNU3/BNU3-m2g-04-05-20_dwi_csa_det_local_native',
-        #'HNU1/HNU1-2-8-20-m2g_staging-native-csa-det',
-        #'IPCAS_8/m2g-bet-test',
-        #'MRN_1/MRN_1-m2g-dwi-05-03-20-csa-det-native',
-        #'NKIENH/NKIENH-m2g-dwi-05-03-20-csa-det-native',
-        #'NKI1/NKI1-2-8-20-m2g_staging-native-csa-det',
-        #'NKI24/NKI24-2-8-20-m2g_staging-native-csa-det',
-        #'SWU4/SWU4-2-8-20-m2g_staging-native-csa-det',
-        'XHCUMS/XHCUMS-m2g-dwi-05-03-20-csa-det-native']#,
-        #'Choe-DWI/Choe-8-5-20-m2g_staging-native-csa-det']
-
-localpath = '/'
 
 PTR = True
-PLOTLY = True
-ADJMATRIX = False
+PLOTLY = False
+ADJMATRIX = True
 
 
 def dist (A,B):
@@ -75,119 +51,132 @@ def BezierCv(b, nr=5):
 
 
 
-#all_files = get_matching_s3_objects(bucket, p, suffix="csv")
-client = s3_client(service="s3")
+localpath = '/discrim-data/diffusion'
+datasets = ['SWU4','HNU1','NKIENH','XHCUMS','BNU1','BNU3','IPCAS8','NKI1','NKI24','MRN1']
+dsize = [382,298,192,120,114,46,40,36,36,20]
+#atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
+#atlas = 'Hammersmith_space-MNI152NLin6_res-2x2x2/'
+atlas = 'AAL_space-MNI152NLin6_res-2x2x2/'
 
 
-qq=0
-for p in paths:
-    all_files = get_matching_s3_objects(bucket,p,suffix="csv")
-    for fi in all_files:
-        client.download_file(bucket, fi, f"{localpath}/con_avg/{qq}.csv")
-        print(f"Downloaded {qq}.csv")
-        ind_Connections=np.zeros((71,71))
+#localpath = '/discrim-data/functional'
+#datasets = ['SWU4','HNU1','NYU2','XHCUMS','UPSM1','BNU3','IPCAS7','SWU1','IPCAS1','BNU1']
+#dsize = [429,300,300,247,230,144,144,119,114,106]
+#atlas = '_mask_Desikan_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Desikan_space-MNI152NLin6_res-2x2x2.nii.gz'
+#atlas='_mask_Hammersmith_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..Hammersmith_space-MNI152NLin6_res-2x2x2.nii.gz/'
+#atlas='_mask_AAL_space-MNI152NLin6_res-2x2x2_mask_file_..m2g_atlases..atlases..label..Human..AAL_space-MNI152NLin6_res-2x2x2.nii.gz/'
 
-        #networkx.read_edgelist(f'{localpath}/con_avg/{qq}.csv', delimiter=',')
-        with open(f'{localpath}/con_avg/{qq}.csv', newline='') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                edges = str(row).split("'")[1]
-                a = int(edges.split(' ')[0])
-                b = int(edges.split(' ')[1])
-                weight = float(edges.split(' ')[2])
+#Calculate total size of scans
+tot = sum(dsize)
 
-                #if a not in ind_Connections.keys():
-                #    ind_Connections[a]={}
-                #    ind_Connections[a][b] = np.zeros(0)
-                #elif b not in ind_Connections[a].keys():
-                #    ind_Connections[a][b] = np.zeros(0)
+for idx, dset in enumerate(datasets):
+    # get list of all files belonging to atlas:
+    connectomes = os.listdir(f"{localpath}/{dset}/{atlas}")
 
-                #ind_Connections[a][b] = np.append(ind_Connections[a][b],[weight])
-
-                ind_Connections[a][b] = weight
+    if idx>0:
+        for name in connectomes:
+            if "mean-ptr" in name:
+                mean_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
+            if "variance-ptr" in name:
+                var_files.append(f"{localpath}/{dset}/{atlas}/{str(name)}")
         
-        if PTR:#EXPERIMENTAL
-            m = np.asmatrix(ind_Connections, dtype=float)
-            ind_Connections = np.array(pass_to_ranks(m))
+    else: # itterate through list and calculate mean and variance of edgelist
+        mean_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "mean-ptr" in name]
+        var_files = [f"{localpath}/{dset}/{atlas}/{str(name)}" for name in connectomes if "variance-ptr" in name]
+    
 
-        r,c = ind_Connections.shape
-        for k in range(1,r):
-            for j in range(k+1,c):
-                if str(k) not in Connections.keys():
-                    Connections[str(k)]={}
-                    Connections[str(k)][str(j)] = np.zeros(0)
-                elif str(j) not in Connections[str(k)].keys():
-                    Connections[str(k)][str(j)] = np.zeros(0)
+# Create the weighted averages for mean and variance
+list_of_means, verts = import_edgelist(mean_files, delimiter=" ", return_vertices=True)
+if not isinstance(list_of_means, list):
+    list_of_means = [list_of_means]
 
-                Connections[str(k)][str(j)] = np.append(Connections[str(k)][str(j)],[ind_Connections[k][j]])
+mean_connectome = np.array([array * (dsize[idx]/tot) for idx, array in enumerate(list_of_means)])
+mean_connectome = np.atleast_3d(mean_connectome)
+mean_connectome = np.sum(mean_connectome, axis=0)
 
-        os.remove(f'{localpath}/con_avg/{qq}.csv')
-        qq=qq+1
+#mean_connectome = np.array([array for idx, array in enumerate(list_of_means)])
+#meany = np.atleast_3d(mean_connectome)
+
+#for mean_connectome in meany:
+
+if 'Desikan' in atlas:
+    ipsi=[]
+    contra=[]
+    hom=[]
+
+    r,c = mean_connectome.shape
+    for j in range(r):
+        for i in range(c):
+            if i>j:
+                if j+35==i:
+                    hom.append(mean_connectome[j][i])
+                elif i<35 and j<35:
+                    ipsi.append(mean_connectome[j][i])
+                elif i>=35 and j>=35:
+                    ipsi.append(mean_connectome[j][i])
+                else:
+                    contra.append(mean_connectome[j][i])
+    hom=np.array(hom)
+    ipsi=np.array(ipsi)
+    contra=np.array(contra)
+
+if 'Hammer' in atlas:
+    ipsi=[]
+    contra=[]
+    hom=[]
+
+    r,c = mean_connectome.shape
+    for j in range(r):
+        for i in range(c):
+            if i not in {43,48} and j not in {43,48}:
+                if i>j:
+                    if (i==j+1) and (j % 2==1):
+                        hom.append(mean_connectome[j][i])
+                    elif i % 2 == j % 2:
+                        ipsi.append(mean_connectome[j][i])
+                    else:
+                        contra.append(mean_connectome[j][i])
+    hom=np.array(hom)
+    ipsi=np.array(ipsi)
+    contra=np.array(contra)
+
+if 'AAL' in atlas:
+    ipsi=[]
+    contra=[]
+    hom=[]
+
+    r,c = mean_connectome.shape
+    for j in range(r):
+        for i in range(c):
+            if i>j:
+                if (i==j+1) and (j % 2==1):
+                    hom.append(mean_connectome[j][i])
+                elif i % 2 == j % 2:
+                    ipsi.append(mean_connectome[j][i])
+                else:
+                    contra.append(mean_connectome[j][i])
+    hom=np.array(hom)
+    ipsi=np.array(ipsi)
+    contra=np.array(contra)
+
+
+print(f'Ipsi = {np.mean(ipsi)} ({np.std(ipsi)})')
+print(f'Homotopic = {np.mean(hom)} ({np.std(hom)})')
+print(f'Contralateral = {np.mean(contra)} ({np.std(contra)})')
 
 
 
 #Calculate average connections and make it into a matrix
 
-heatmap = np.zeros((71,71))
-edgeweights = list()
+#heatmap = np.zeros((71,71))
+#edgeweights = list()
 edge_colors = {}
 
-if ADJMATRIX:
-    for k in Connections:
-        for j in Connections[k]:
-            heatmap[int(k)][int(j)] = np.average(Connections[k][j])
-            heatmap[int(j)][int(k)] = np.average(Connections[k][j])
-elif PLOTLY:
-    for k in Connections:
-        for j in Connections[k]:
-            heatmap[int(k)][int(j)] = np.average(Connections[k][j])
-else:
-    for k in Connections:
-        for j in Connections[k]:
-            if np.average(Connections[k][j]) > 0.8:
-                heatmap[int(k)][int(j)] = np.average(Connections[k][j])*4
-            elif np.average(Connections[k][j]) <= 0.8 and np.average(Connections[k][j]) > 0.5:
-                heatmap[int(k)][int(j)] = np.average(Connections[k][j])/2
-            else:
-                heatmap[int(k)][int(j)] = 0
-            edgeweights.append(np.average(Connections[k][j]))
-
-
-##### Heatmap Generation
-
-if ADJMATRIX:
-#Generate labels for figure
-    atlases=list()
-    for i in range(0,71):
-        atlases.append(str(i))
-
-    fig, ax = plt.subplots()
-    im = ax.imshow(heatmap, cmap="gist_heat_r") #Can specify the colorscheme you wish to use
-    ax.set_xticks(np.arange(len(atlases)))
-    ax.set_yticks(np.arange(len(atlases)))
-
-    ax.set_xticklabels(atlases)
-    ax.set_yticklabels(atlases)
-
-    #Label x and y-axis, adjust fontsize as necessary
-    plt.setp(ax.get_xticklabels(), fontsize=6, rotation=90, ha="right", va="center", rotation_mode="anchor")
-    plt.setp(ax.get_yticklabels(), fontsize=6)
-
-    plt.colorbar(im, aspect=30)
-    ax.set_title("Averaged Connections")
-        
-    fig.tight_layout()
-
-    plt.show()
-
-    plt.savefig(f'{localpath}/con_avg/heatmap.png', dpi=1000)
-
-##### END
 
 if PLOTLY:
-    m = np.asmatrix(heatmap,dtype=float)
+    m = np.asmatrix(mean_connectome, dtype=float)#heatmap,dtype=float)
     Q=nx.from_numpy_matrix(m)
-    Q.remove_node(0)
+    #Q.remove_node(0)
 
     nx.write_gml(Q,'avg_edges.gml')
 
@@ -277,7 +266,7 @@ if PLOTLY:
                             mode='lines',
                             line=Line(color=color, 
                                     shape='spline',
-                                    width=floor(Weights[j]*1.9)#The  width is proportional to the edge weight
+                                    width=floor(Weights[j]*1.1)#The  width is proportional to the edge weight
                                     ), 
                             hoverinfo='none' 
                         )
@@ -306,8 +295,7 @@ if PLOTLY:
 
     width=800
     height=850
-    title="A circular graph associated to Eurovision Song Contest, 2015<br>Data source:"+\
-    "<a href='http://www.eurovision.tv/page/history/by-year/contest?event=2083#Scoreboard'> [1]</a>"
+    title="Circos plot"
     layout=Layout(title= title,
                 font= Font(size=12),
                 showlegend=False,
@@ -328,46 +316,10 @@ if PLOTLY:
 
     data=Data(lines+edge_info+[trace2])
     fig=Figure(data=data, layout=layout)
-    py.iplot(fig, filename='Eurovision-15') 
+    # iplot(multi)
+    py.plot(fig, validate=False, filename='/disctest/circos_diff.html')
+    #py.iplot(fig, filename='Eurovision-15')
 
     print('done')
-
-else:
-    m = np.asmatrix(heatmap, dtype=float)
-    Q = nx.from_numpy_matrix(m)
-    #nx.set_edge_attributes(Q, edge_colors, 'color')
-
-    for k in Connections:
-        for j in Connections[k]:
-            try:
-                if int(k)<35 and int(j)<=35:
-                    Q.edges[int(k),int(j)]['color']='z'
-                elif int(k)>=35 and int(j)>35:
-                    Q.edges[int(k),int(j)]['color']='zop'
-                elif int(k) == 70-int(j):
-                    Q.edges[int(k),int(j)]['color']='zoop'
-                else:
-                    Q.edges[int(k),int(j)]['color']='zeep'
-            except:
-                print(f'No edges detected between {k} and {j}')
-
-    nx.relabel_nodes(Q, {i: "long name #" + str(i) for i in range(70)})
-
-    Q.remove_node(0)
-
-    c=CircosPlot(graph=Q, node_size=3,node_labels=True, edge_color="color", edge_width='weight', node_label_layout='rotation')
-    q=0
-    for node_color in c.node_colors:
-        if q <= 35:
-            c.node_colors[q] = 'green'
-            q=q+1
-        else:
-            c.node_colors[q] = 'red'
-            q=q+1
-
-
-
-    c.draw()
-    plt.savefig('/Users/ross/Documents/con_avg/test.png')
 
 print('oof')
