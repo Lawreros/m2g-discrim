@@ -84,7 +84,7 @@ for idx, ploty in enumerate(list_of_means):
     c = idx+1
     #for comp in ploty:
     if idx == 11:
-        multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="viridis"), *locs[idx])
+        multi.append_trace(go.Heatmap(z=ploty, colorbar_x=0.82, colorbar_len=0.47, colorbar_y=0.23, colorscale="blues"), *locs[idx])
     else:
         multi.append_trace(go.Heatmap(z=ploty, coloraxis="coloraxis"), *locs[idx])
     if idx==0 or idx == 5 or idx==10:
