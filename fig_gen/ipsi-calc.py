@@ -54,9 +54,10 @@ def BezierCv(b, nr=5):
 localpath = '/discrim-data/diffusion'
 datasets = ['SWU4','HNU1','NKIENH','XHCUMS','BNU1','BNU3','IPCAS8','NKI1','NKI24','MRN1']
 dsize = [382,298,192,120,114,46,40,36,36,20]
-#atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
+
+atlas = 'Desikan_space-MNI152NLin6_res-2x2x2'
 #atlas = 'Hammersmith_space-MNI152NLin6_res-2x2x2/'
-atlas = 'AAL_space-MNI152NLin6_res-2x2x2/'
+#atlas = 'AAL_space-MNI152NLin6_res-2x2x2/'
 
 
 #localpath = '/discrim-data/functional'
@@ -159,7 +160,7 @@ if 'AAL' in atlas:
     ipsi=np.array(ipsi)
     contra=np.array(contra)
 
-
+tot = np.sum(ipsi)+np.sum(hom)+np.sum(contra)
 print(f'Ipsi = {np.mean(ipsi)} ({np.std(ipsi)})')
 print(f'Homotopic = {np.mean(hom)} ({np.std(hom)})')
 print(f'Contralateral = {np.mean(contra)} ({np.std(contra)})')
