@@ -397,3 +397,6 @@ def main():
         #py.iplot(fig, filename='Eurovision-15')
 
         print('done')
+
+if __name__ == "__main__":
+    main()
