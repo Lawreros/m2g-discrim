@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 from subprocess import Popen
 from scipy.stats import gaussian_kde
+from m2g.utils import cloud_utils
 
 import numpy as np
 import nibabel as nb
@@ -97,18 +98,12 @@ def compute_metrics(fs, outdir, atlas, verb=False):
     """
 
     graphs = loadGraphs(fs, verb=verb)
-    nodes = nx.number_of_nodes(graphs.values()[0])
-
-    #  Number of non-zero edges (i.e. binary edge count)
-    print("Computing: NNZ")
-    nnz = OrderedDict((subj, len(nx.edges(graphs[subj]))) for subj in graphs)
-    write(outdir, 'number_non_zeros', nnz, atlas)
-    print("Sample Mean: %.2f" % np.mean(nnz.values()))
+    #nodes = nx.number_of_nodes(graphs.values()[0])
 
     #  Degree sequence
     print("Computing: Degree Sequence")
-    total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
-                            for subj in graphs)
+    #total_deg = OrderedDict((subj, np.array(nx.degree(graphs[subj]).values()))
+    #                        for subj in graphs)
     ipso_deg = OrderedDict()
     contra_deg = OrderedDict()
     for subj in graphs:  # TODO GK: remove forloop and use comprehension maybe?
@@ -274,29 +269,87 @@ def main():
     """
 
     parser = ArgumentParser(description="Computes Graph Metrics")
-    parser.add_argument("indir", action="store", help="base directory loc")
-    parser.add_argument("outdir", action="store", help="base directory loc")
-    parser.add_argument("atlas", action="store", help="atlas directory to use")
-    parser.add_argument("-f", "--fmt", action="store_true", help="Formatting \
-                        flag. True if bc1, False if greg's laptop.")
+    parser.add_argument(
+        "input_dir",
+        help="""The directory with the input dataset
+        formatted according to the BIDS standard.
+        To use data from s3, just pass `s3://<bucket>/<dataset>` as the input directory.""",
+    )
+    parser.add_argument(
+        "output_dir",
+        help="""The local directory where the output
+        files should be stored.""",
+    )
+    parser.add_argument(
+        "pipeline",
+        help="""Pipeline that created the data""",
+    )
+    parser.add_argument(
+        "atlases",
+        action="store",
+        help="which atlases to use",
+        nargs="+",
+        default=None,
+    )
+
     parser.add_argument("-v", "--verb", action="store_true", help="")
     result = parser.parse_args()
 
     #  Sets up directory to crawl based on the system organization you're
     #  working on. Which organizations are pretty clear by the code, methinks..
-    indir = result.indir
-    atlas = result.atlas
+    indir = result.input_dir
+    outdir = result.output_dir
+    atlas = result.atlases
+    pipe = result.pipeline
 
-    #  Crawls directories and creates a dictionary entry of file names for each
-    #  dataset which we plan to process.
-    fs = [indir + "/" + fl
-          for root, dirs, files in os.walk(indir)
-          for fl in files
-          if fl.endswith(".graphml") or fl.endswith(".gpickle")]
 
-    p = Popen("mkdir -p " + result.outdir, shell=True)
+
+    if "s3://" in indir:
+        # grab files from s3
+        creds = bool(cloud_utils.get_credentials())
+
+        buck, remo = cloud_utils.parse_path(input_dir)
+        home = os.path.expanduser("~")
+        input_dir = as_directory(home + "/.m2g/input", remove=True)
+
+        if (not creds) and push_location:
+            raise AttributeError(
+                """No AWS credentials found."""
+            )
+
+
+        # Get S3 input data if needed
+        if pipe =='func':
+            if atlases is not None:
+                for atlas in atlases:
+                    info = f"_mask_{atlas}"
+                    cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+            else:
+                info = "_mask_"
+                cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+        elif pipe=='dwi':
+            if atlases is not None:
+                for atlas in atlases:
+                    info = f"{atlas}"
+                    cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+            else:
+                info = ""
+                cloud_utils.s3_get_data(buck, remo, input_dir, info=info, pipe=pipe)
+    
+
+    #fs = dict()
+    #for root, dirs, files in os.walkdir(f"{indir}/{dset}"):
+    #    if 
+
+    #fs = [indir + "/" + for root, dirs, files in os.walk(indir)
+    #    for fl in files
+    #    if fl.endeswith(".csv")]
+
+    fs = ['/disctest/BNU1/Desikan/sub-0025864_ses-1_connectome.csv','/disctest/BNU1/Desikan/sub-0025864_ses-2_connectome.csv']
+
+    os.makedirs(outdir, exist_ok=True)
     #  The fun begins and now we load our graphs and process them.
-    compute_metrics(fs, result.outdir, atlas, result.verb)
+    compute_metrics(fs, outdir, atlas)
 
 
 if __name__ == "__main__":
