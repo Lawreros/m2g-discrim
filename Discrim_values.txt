@@ -1,0 +1,96 @@
+IBATRT:
+Brodmann_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.81872312604287
+Brodmann_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9186009899242715
+Juelich_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8598633439224747
+Juelich_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9660746374021306
+HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8497515161725068
+HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8399395135412656
+AAL_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8649744095751509
+AAL_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9384566326530612
+Yeo-7_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7254554534077782
+Yeo-7_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.7980903446284175
+DKT_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.832830950776537
+DKT_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9175089847259659
+Hammersmith_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8655169025157233
+Hammersmith_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9329304245283019
+DS00071_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8783351784109872
+DS00071_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9616634979463483
+Destrieux_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8319324781799511
+Destrieux_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9453165110383777
+Yeo-17_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7628513669618792
+Yeo-17_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8636497641509434
+JHU_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8585397012578617
+JHU_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8879937588242844
+Glasser_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8564379171479912
+Glasser_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9677271852137083
+HarvardOxfordcort-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8222799143242203
+HarvardOxfordcort-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9417135958156848
+Yeo-17-liberal_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7627561048004106
+Yeo-17-liberal_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.866296046720575
+Desikan_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8352425876010781
+Desikan_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9461207242330895
+MICCAI_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8622970414580927
+MICCAI_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9382951883583622
+Tissue_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.5825180897830831
+Tissue_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.5852395793222949
+Yeo-7-liberal_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7260109822230779
+Yeo-7-liberal_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.800567662206392
+AICHAJoliot2015_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8883156446540882
+AICHAJoliot2015_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9613045100115518
+DesikanKlein_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8614767841098704
+DesikanKlein_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9276328455910666
+CAPRSC_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8922996085226543
+CAPRSC_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9829440620587858
+Schaefer400_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8903291859196508
+Schaefer400_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9817196925940188
+Princetonvisual-top_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9194503273007315
+Princetonvisual-top_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9861669313951996
+Schaefer200_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8631734533436016
+Schaefer200_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9701137530483891
+Schaefer300_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8779952429084841
+Schaefer300_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.978298276857913
+
+
+BMB_1:
+Brodmann_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8868308007013442
+Brodmann_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9262222384570427
+Juelich_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9053696668614846
+Juelich_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9687551139684395
+HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7620748100526009
+HarvardOxfordsub-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.7675365283459965
+AAL_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9222903272939802
+AAL_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9590999415546463
+Yeo-7_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7233467270601988
+Yeo-7_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.6954310344827587
+DKT_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8945565458796025
+DKT_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9609745762711864
+Hammersmith_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9100489479836352
+Hammersmith_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.945134424313267
+DS00071_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9393147282291059
+DS00071_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9620017533606078
+Destrieux_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8814611338398598
+Destrieux_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9562229690239625
+Yeo-17_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8041138223261249
+Yeo-17_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8469747223845704
+JHU_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8240772939801286
+JHU_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8114297194623028
+Glasser_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9407999707773231
+Glasser_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9822136177673875
+HarvardOxfordcort-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8849700467562829
+HarvardOxfordcort-maxprob-thr25_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9542314436002338
+Yeo-17-liberal_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8107787843366452
+Yeo-17-liberal_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.8525905902980714
+Desikan_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8858576855639976
+Desikan_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9548568088836937
+MICCAI_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9153309468147284
+MICCAI_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9538909994155464
+Tissue_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.5981523962594973
+Tissue_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.5345704266510812
+Yeo-7-liberal_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.7283562244301578
+Yeo-7-liberal_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.7007996054938633
+AICHAJoliot2015_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9524758912916425
+AICHAJoliot2015_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9882261835184103
+DesikanKlein_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.8992409409701929
+DesikanKlein_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.941063705435418
+CAPRSC_space-MNI152NLin6_res-2x2x2.nii.gz Discriminability is : 0.9592628579777909
+CAPRSC_space-MNI152NLin6_res-2x2x2.nii.gz PTR Discriminability is : 0.9904164231443598

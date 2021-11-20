@@ -10,6 +10,7 @@ from m2g.utils.gen_utils import as_directory
 from graspy.utils import pass_to_ranks, import_edgelist
 from argparse import ArgumentParser
 
+import json
 from math import floor
 import igraph as ig
 import plotly
@@ -248,23 +249,38 @@ def load_avg_ptr():
 
 
 def ipsi_calc(connectome, atlas, pipeline='dwi', verbose=False):
-    if 'Desikan' in atlas:
+    if 'DKT' in atlas:
         ipsi=[]
         contra=[]
         hom=[]
 
+        with open('/DKT_space-MNI152NLin6_res-1x1x1.json') as f:
+            des_dat = json.load(f)
+
         r,c,_ = connectome.shape
         for j in range(r):
             for i in range(c):
-                if i>j:
-                    if j+35==i:
-                        hom.append(connectome[j][i])
-                    elif i<35 and j<35:
-                        ipsi.append(connectome[j][i])
-                    elif i>=35 and j>=35:
-                        ipsi.append(connectome[j][i])
-                    else:
-                        contra.append(connectome[j][i])
+                if des_dat['rois'][str(i)]['label'] and des_dat['rois'][str(j)]['label']:
+                    if i>j:
+                        if des_dat['rois'][str(i)]['label'][0] == des_dat['rois'][str(j)]['label'][0]:
+                            ipsi.append(connectome[j][i])
+                        elif i == j+41:
+                            hom.append(connectome[i][j])
+                        elif des_dat['rois'][str(i)]['label'][0] != des_dat['rois'][str(j)]['label'][0]:
+                            contra.append(connectome[j][i])
+
+        #r,c,_ = connectome.shape
+        #for j in range(r):
+        #    for i in range(c):
+        #        if i>j:
+        #            if j+35==i:
+        #                hom.append(connectome[j][i])
+        #            elif i<35 and j<35:
+        #                ipsi.append(connectome[j][i])
+        #            elif i>=35 and j>=35:
+        #                ipsi.append(connectome[j][i])
+        #            else:
+        #                contra.append(connectome[j][i])
 
 
     if 'Hammer' in atlas:
@@ -452,9 +468,9 @@ def main():
 
 
         #Write the dataset being analyzed
-        with open('results.csv', mode='a') as result_file:
-            result_writer = csv.writer(result_file, delimiter=" ")
-            result_writer.writerow([f"{title}"])
+        #with open('results.csv', mode='a') as result_file:
+        #    result_writer = csv.writer(result_file, delimiter=" ")
+        #    result_writer.writerow([f"{title}"])
 
 
 
@@ -491,6 +507,32 @@ def main():
                 hom.append(h)
                 contra.append(c)
 
+
+
+            if "DKT" in atlas:
+                a = 'dkt'
+                atlas = "DKT"
+            elif "Hammer" in atlas:
+                a = 'hammer'
+                atlas = "Hammer"
+            elif "AAL" in atlas:
+                a = 'aal'
+                atlas="AAL"
+
+            if pipe == "func":
+                ipsi_t = ipsi
+                contra_t = contra
+                hom_t = hom
+
+            with open(f'{pipe}_ipsi_{a}.csv', mode='a') as result_file:
+                result_writer = csv.writer(result_file, delimiter=" ")
+                result_writer.writerow([f"Dataset", f"Atlas",f"Type", f"Value"])
+                for idx, i in enumerate(ipsi_t):
+                    result_writer.writerow([f"{title}",f"{atlas}",f"Ipsi",i])
+                for idx, i in enumerate(hom_t):
+                    result_writer.writerow([f"{title}",f"{atlas}",f"Hom",i])
+                for idx, i in enumerate(contra_t):
+                    result_writer.writerow([f"{title}",f"{atlas}",f"Contra",i])
 
             print(f'{atlas}:')
             print(f"Ipsi count: {results.count('i')}")

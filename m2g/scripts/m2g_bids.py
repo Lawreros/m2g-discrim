@@ -214,6 +214,7 @@ def main():
     for at in latlas:
         os.makedirs(f"{output_dir}/{at}", exist_ok=True)
         if disc:
+            print(at)
             discrim = discrim_runner(input_dir, at, ptr=False)
             discrim_ptr = discrim_runner(input_dir, at, ptr=True)
         
@@ -223,19 +224,19 @@ def main():
             f.close()
 
         # Create averaged/variance connectomes and save them
-        avgconnectome(input_dir, output_dir, at)
+        #avgconnectome(input_dir, output_dir, at)
 
-        if push_location:
-            print(f"Pushing to s3 at {push_location}.")
-            push_buck, push_remo = cloud_utils.parse_path(push_location)
-            cloud_utils.s3_push_data(
-                push_buck,
-                push_remo,
-                output_dir,
-                discrim=disc,
-                atlas=at,
-                creds=creds,
-            )
+        #if push_location:
+        #    print(f"Pushing to s3 at {push_location}.")
+        #    push_buck, push_remo = cloud_utils.parse_path(push_location)
+        #    cloud_utils.s3_push_data(
+        #        push_buck,
+        #        push_remo,
+        #        output_dir,
+        #        discrim=disc,
+        #        atlas=at,
+        #        creds=creds,
+        #    )
             
 
 
